@@ -1,0 +1,157 @@
+// Motor A connections
+#define enA 10
+#define in1 A0
+#define in2 A1
+// Motor B connections
+#define enB 11
+#define in3 A2
+#define in4 A3
+#define HIGH 1
+#define LOW 0
+
+//Sensor Pins
+#define s1 5
+#define s2 6
+
+
+
+
+void setup() {
+  // Set all the motor control pins to outputs
+  pinMode(enA, OUTPUT);
+  pinMode(enB, OUTPUT);
+  pinMode(in1, OUTPUT);
+  pinMode(in2, OUTPUT);
+  pinMode(in3, OUTPUT);
+  pinMode(in4, OUTPUT);
+
+  // Turn off motors - Initial state
+  digitalWrite(in1, LOW);
+  digitalWrite(in2, LOW);
+  digitalWrite(in3, LOW);
+  digitalWrite(in4, LOW);
+
+
+  // Start the Serial Communication
+  Serial.begin(9600);
+
+  // Set all the IR Sensor Pins as inputs
+  pinMode(s1, INPUT);
+  pinMode(s2, INPUT);
+  
+
+  //Reduce the speed of both the motors
+  analogWrite(enA, 125);
+  analogWrite(enB, 125);
+}
+
+void loop() {
+
+  int value_1 = digitalRead(s1);
+  int value_2 = digitalRead(s2);
+
+  if ((value_1 == HIGH) && (value_2 == HIGH)  { //Line is in center
+    forward();
+    Serial.println("Going Forward");
+  }  else if ((value_1 == LOW) && (value_2 == HIGH) { //Line is towards Left
+    stop_robot();
+    delay(3000);
+    left();
+    Serial.println("Turning Left");
+    while (! ((digitalRead(s1) == HIGH) && (digitalRead(s2) == HIGH) )) {}
+    stop_robot();
+  } else if ((value_1 == HIGH) && (value_2 == LOW) ) { //Line is towards Right
+    stop_robot();
+    Serial.println("Let me Check!");
+    delay(10000);
+    check();
+  } else if ((value_1 == LOW) && (value_2 == LOW) ) { //T Point
+    stop_robot();
+    Serial.println("T Point! Going Left");
+    delay(6000);
+    left();
+    delay(500);
+  } else if ((value_1 == HIGH) && (value_2 == HIGH) ) { //Dead End!
+    Serial.println("Dead End! Taking a U-Turn");
+    u_turn();
+  }
+}
+
+
+
+void check() {
+  forward();
+  Serial.println("Going forward to check");
+  delay(200);
+  stop_robot();
+  if ((digitalRead(s1) == HIGH) && (digitalRead(s2) == HIGH) ) { //Forward Option Available
+    forward();
+    Serial.println("Going Forward");
+
+  } else if ((digitalRead(s1) == HIGH) && (digitalRead(s2) == HIGH) ) {//Right Only
+    right();
+    Serial.println("Turning Right");
+
+  } else if ((digitalRead(s1) == LOW) && (digitalRead(s2) == LOW) ) { //FINISH
+    Serial.println("FINISH! I have completed the Maze");
+    while (true) {}
+  }
+
+
+}
+
+
+// Function to go forward
+void forward() {
+  digitalWrite(in1, HIGH);
+  digitalWrite(in2, LOW);
+  digitalWrite(in3, HIGH);
+  digitalWrite(in4, LOW);
+}
+
+// Function to go backward
+void backward() {
+  digitalWrite(in1, LOW);
+  digitalWrite(in2, HIGH);
+  digitalWrite(in3, LOW);
+  digitalWrite(in4, HIGH);
+}
+
+
+// Function to go Right
+void right() {
+  digitalWrite(in1, HIGH);
+  digitalWrite(in2, LOW);
+  digitalWrite(in3, LOW);
+  digitalWrite(in4, HIGH);
+  while (digitalRead(s1) != LOW) {}
+
+}
+
+// Function to go Left
+void left() {
+  digitalWrite(in1, LOW);
+  digitalWrite(in2, HIGH);
+  digitalWrite(in3, HIGH);
+  digitalWrite(in4, LOW);
+}
+
+
+// Function to stop
+void stop_robot() {
+  digitalWrite(in1, LOW);
+  digitalWrite(in2, LOW);
+  digitalWrite(in3, LOW);
+  digitalWrite(in4, LOW);
+}
+
+// Function to take a U-Turn
+void u_turn() {
+  digitalWrite(in1, LOW);
+  digitalWrite(in2, HIGH);
+  digitalWrite(in3, HIGH);
+  digitalWrite(in4, LOW);
+
+  while (digitalRead(s3) != LOW) {}
+  stop_robot();
+}
